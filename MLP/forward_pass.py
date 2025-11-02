@@ -23,9 +23,13 @@ def handel_activation(cal,activation):
         print("no activation applied")
         return cal
 
-def calculate_forward_pass(input_seq,weights,bias,ln_w,ln_b,activation="ReLU"):
-    a=[]
-    sa=[]
+def calculate_forward_pass(input_seq,weights,bias,ln_w,ln_b,activation="ReLU",verbose=False):
+    f_pass=[]
+    z=[]
+    z_scale=[]
+    z_norm=[]
+    mean_deviation_sd=[]
+
     last_step=input_seq
 
     idx=0
@@ -35,24 +39,30 @@ def calculate_forward_pass(input_seq,weights,bias,ln_w,ln_b,activation="ReLU"):
         # weight * sa * bias
         cal=np.dot(last_step,w)
         cal+=b
-        a.append(cal)
-        print(f"------------- Z{idx}",cal)
+        z.append(cal)
+        if verbose:
+            print(f"------------- Z{idx}",cal)
 
         # LN
-        if idx!=len(w):
-            cal=LN(cal)
-            print(f"------------- Z_norm {cal}")
+        if idx!=len(weights):
+            cal,temp=LN(cal,verbose=verbose)
+            mean_deviation_sd.append(temp)
+            if verbose:
+                print(f"------------- Z_norm {cal}")
+            z_norm.append(cal)
 
             cal=(cal * ln_w[idx-1]) + ln_b[idx-1]
-            print(f"------------- Z_scale {cal}")
-
+            z_scale.append(cal)
+            if verbose:
+                print(f"------------- Z_scale {cal}")
             # activation         
             cal=handel_activation(cal,activation)
         
-        sa.append(cal)
-        print(f"------------- A{idx}",cal,end=f"\n\n=== pass{idx} completed ====\n\n")
+        f_pass.append(cal)
+        if verbose:
+            print(f"------------- A{idx}",cal,end=f"\n\n=== pass{idx} completed ====\n\n")
 
         last_step=cal
 
-    return a,sa
+    return f_pass,mean_deviation_sd,z,z_scale,z_norm
 

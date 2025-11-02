@@ -1,10 +1,23 @@
-import numpy as np
+from forward_pass import calculate_forward_pass
+
+import pickle
+
+path="MLP/weights/xor.pkl" # XOR
+# path="MLP/weights/addition.pkl" # ADDITION
+
+with open(path,"rb") as f:
+    data = pickle.load(f)
+
+input_seq=[1,0]
+
+# this will remain the same ----------------
+
+weights=data['weights']
+bias=data['bias']
+ln_w=data['ln_w']
+ln_b=data['ln_b']
 
 
-w1=[[0.1,0.2,0.3],[0.4,0.5,0.6]]
-w2=[[0.1,0.2,0.3],[0.4,0.5,0.6],[0.7,0.8,0.9]]
-w3=[[.1,.2],[.3,.4],[.5,.6]]
+result=calculate_forward_pass(input_seq,weights,bias,ln_w,ln_b)
 
-b1=[0.1,0.2,0.3]
-b2=[0.1,0.2,0.3]
-b3=[0.1,.2]
+print(result[0][-1])
