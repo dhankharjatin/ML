@@ -24,7 +24,14 @@ def initialize_weights(input_seq, num_heads):
 
     print("\n=======\n")
 
+    Q = np.array_split(Q,num_heads,axis=1)
+    K = np.array_split(K,num_heads,axis=1)
+    V = np.array_split(V,num_heads,axis=1)
+
+    print(Q, end="\n\n")
+    print(K, end="\n\n")
+    print(V, end="\n\n")
 
 inp = np.random.rand(3, 4)
 
-initialize_weights(inp)
+initialize_weights(inp,2)
