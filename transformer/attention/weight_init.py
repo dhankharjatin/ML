@@ -1,37 +1,58 @@
 import numpy as np
 
 
-def initialize_weights(input_seq, num_heads):
-    r, c = inp.shape
+def initialize_weights(input_seq):
 
-    q = np.random.rand(c, c)
-    k = np.random.rand(c, c)
-    v = np.random.rand(c, c)
+    input_seq=np.array(input_seq)
 
-    print(q, end="\n\n")
-    print(k, end="\n\n")
-    print(v, end="\n\n")
+    rows, columns = input_seq.shape
 
-    print("\n=========\n")
+    # q = np.random.rand(columns, columns)
+    # k = np.random.rand(columns, columns)
+    # v = np.random.rand(columns, columns)
 
-    Q = input_seq @ q
+    # print(q, end="\n\n")
+    # print(k, end="\n\n")
+    # print(v, end="\n\n")
+
+    q = np.array([[0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4]])
+    k = np.array([[0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4]])
+    v = np.array([[0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4]])
+    
+    # print(q, end="\n\n")
+    # print(k, end="\n\n")
+    # print(v, end="\n\n")
+    
+    # linear projection 
+
+    Q = input_seq @ q 
     K = input_seq @ k
-    V = input_seq @ v
+    V = input_seq @ v 
 
     print(Q, end="\n\n")
     print(K, end="\n\n")
     print(V, end="\n\n")
 
-    print("\n=======\n")
+    return Q,K,V
 
-    Q = np.array_split(Q,num_heads,axis=1)
-    K = np.array_split(K,num_heads,axis=1)
-    V = np.array_split(V,num_heads,axis=1)
 
-    print(Q, end="\n\n")
-    print(K, end="\n\n")
-    print(V, end="\n\n")
+def split_into_heads(num_heads,Q,K,V):
 
-inp = np.random.rand(3, 4)
+    rows,columns=Q.shape
+    
+    if columns % num_heads!=0:
+        print("invalid number of heads, Defaulting to num_head = 1")
+        num_heads=1
 
-initialize_weights(inp,2)
+    Q=np.array_split(Q,num_heads,axis=1)
+    K=np.array_split(K,num_heads,axis=1)
+    V=np.array_split(V,num_heads,axis=1)
+
+    for i in Q:
+        print(i)
+    for i in K:
+        print(i)
+    for i in V:
+        print(i)
+
+
