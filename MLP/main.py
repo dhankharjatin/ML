@@ -92,5 +92,12 @@ data = {}
 
 import pickle
 
-with open("MLP/weights/addition.pkl", "wb") as f:
-    pickle.dump({"weights": weights, "bias": bias, "ln_w": ln_w, "ln_b": ln_b}, f)
+confirm=input("save weights (y/n)? ")
+
+if confirm == "y":
+    with open("MLP/weights/addition.pkl", "wb") as f:
+        pickle.dump({"weights": weights, "bias": bias, "ln_w": ln_w, "ln_b": ln_b}, f)
+    print("saved")
+else:
+    print("NOT saved")
+    
