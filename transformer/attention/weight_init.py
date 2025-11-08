@@ -10,6 +10,7 @@ def initialize_weights(input_seq):
     # q = np.random.rand(columns, columns)
     # k = np.random.rand(columns, columns)
     # v = np.random.rand(columns, columns)
+    # output_matrix = np.random.rand(columns, columns)
 
     # print(q, end="\n\n")
     # print(k, end="\n\n")
@@ -26,17 +27,26 @@ def initialize_weights(input_seq):
     k = np.array(
         [
             [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
+            [0.5, 0.6, 0.7, 0.8],
+            [0.9, 1.0, 1.1, 1.2],
+            [1.3, 1.4, 1.5, 1.6],
         ]
     )
     v = np.array(
         [
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
+            [0.1, 0.1, 0.1, 0.1],
+            [0.2, 0.2, 0.2, 0.2],
+            [0.3, 0.3, 0.3, 0.3],
+            [0.4, 0.4, 0.4, 0.4],
+        ]
+    )
+
+    wo = np.array(
+        [
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
         ]
     )
 
@@ -54,7 +64,7 @@ def initialize_weights(input_seq):
     # print(K, end="\n\n")
     # print(V, end="\n\n")
 
-    return Q, K, V
+    return Q, K, V, wo
 
 
 def split_into_heads(num_heads, Q, K, V):

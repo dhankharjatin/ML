@@ -24,20 +24,27 @@ def softmax(matrix):
 
         final.append(z)
 
-    print(final)
-
     return np.array(final)
 
 
-def calculate_attention_score(Q, K, V):
+def calculate_attention_score(Q, K, V, wo):
     D_k = len(K)
 
-    a = Q[0] @ K[0].T
+    output_matrix = []
+    for idx in range(len(Q)):
+        score = Q[idx] @ K[idx].T
 
-    a = a / D_k ** (1 / 2)
+        # scaled scores
+        scaled_score = score / D_k ** (1 / 2)
 
-    a = softmax(a)
+        scaled_score = softmax(scaled_score)
 
-    output_head = a @ V[0]
+        output = scaled_score @ V[0]
 
-    print(output_head)
+        output_matrix.append(output)
+
+    combined_matrix = np.concat(output_matrix, axis=1)
+
+    output_MHA = combined_matrix @ wo
+
+    print(output_MHA)
