@@ -2,13 +2,13 @@ from forward_pass import calculate_forward_pass
 
 import pickle
 
-path="MLP/weights/xor.pkl" # XOR
-# path="MLP/weights/addition.pkl" # ADDITION
+# path="MLP/weights/xor.pkl" # XOR
+path="MLP/weights/addition.pkl" # ADDITION
 
 with open(path,"rb") as f:
     data = pickle.load(f)
 
-input_seq=[1,0]
+input_seq=[900,-2]
 
 # this will remain the same ----------------
 

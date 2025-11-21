@@ -1,15 +1,8 @@
-import numpy as np
-from attention.weight_init import initialize_weights, split_into_heads
-from attention.forward_pass import calculate_attention_score
+from attention.attention_block import AttentionBlock
+input_seq = [[1, 2, 3, 4], [5, 6,7, 8], [9, 10, 11, 12]]
+# input_seq = [[1, 1.1, 1.2, 1.3], [1.1, 1.2,1.3, 1.4], [1.2, 1.3, 1.4, 1.5]]
 
-input_seq = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
-
-q, k, v, wo = initialize_weights(input_seq)
-
-Q, K, V = split_into_heads(2, q, k, v)
-
-calculate_attention_score(Q, K, V, wo)
-
-f = [[11, 11, 11, 11], [11, 11, 11, 11], [11, 11, 11, 11]]
-
-print(np.array(input_seq) + np.array(f))
+nn=AttentionBlock(input_seq=input_seq,num_heads=2,verbose=True)
+nn.weight_init()
+nn.forward_pass()
+# nn.backpropagation()
