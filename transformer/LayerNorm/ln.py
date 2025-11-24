@@ -1,60 +1,65 @@
 import numpy as np
 
+
 class Norm:
+    def forward(self, matrix, verbose=False):
 
-    def forward(lis,verbose):
-        mean=np.average(lis)
-        if verbose:
-            print("\nmean ",mean)
+        self.normalized_matrix = []
+        self.d_and_sd = []
 
-        variance=0
-        deviations=[]
-
-        for i in lis:
-            deviation=i-mean    
-            deviations.append(deviation)
-            variance+=deviation**2
-
+        for lis in matrix:
+            mean = np.average(lis)
             if verbose:
-                print("deviation ",deviation)
+                print("\nmean ", mean)
 
-        variance=variance/len(lis)
-        if verbose:
-            print("variance ",variance)
+            variance = 0
+            deviations = []
 
-        standard_deviation=variance**(1/2)
-        if verbose:
-            print("standard_deviation ",standard_deviation,end="\n\n")
+            for i in lis:
+                deviation = i - mean
+                deviations.append(deviation)
+                variance += deviation**2
 
-        normalized_list=[]
-        for i in lis:
-            z=(i-mean)/standard_deviation
-            normalized_list.append(z)
+                if verbose:
+                    print("deviation ", deviation)
 
+            variance = variance / len(lis)
+            if verbose:
+                print("variance ", variance)
 
-        return [normalized_list], [deviations,standard_deviation]
+            standard_deviation = variance ** (1 / 2)
+            if verbose:
+                print("standard_deviation ", standard_deviation, end="\n\n")
 
-    def create_jacobian(lis):
+            normalized_list = []
+            for i in lis:
+                z = (i - mean) / standard_deviation
+                normalized_list.append(z)
 
-        deviations=lis[0]
-        sd=lis[1]
-        length=len(deviations)
+            self.normalized_matrix.append(normalized_list)
+            self.d_and_sd.append([deviations, standard_deviation])
 
-        jacobian=[]
+    def create_jacobian(self, matrix):
 
-        for i in range(length):
-            temp=[]
-            for j in range(length):
-                if i == j:
-                    part_1= (1 - (1/length))/sd
-                else:
-                    part_1= (- (1/length))/sd
+        self.jacobian_matrix = []
+        for lis in matrix:
+            deviations = lis[0]
+            sd = lis[1]
+            length = len(deviations)
 
+            jacobian = []
 
-                part_2= (deviations[i] * deviations[j])/ (length * sd**3)
+            for i in range(length):
+                temp = []
+                for j in range(length):
+                    if i == j:
+                        part_1 = (1 - (1 / length)) / sd
+                    else:
+                        part_1 = (-(1 / length)) / sd
 
-                temp.append(part_1-part_2)
+                    part_2 = (deviations[i] * deviations[j]) / (length * sd**3)
+                    temp.append(part_1 - part_2)
 
-            jacobian.append(temp)
+                jacobian.append(temp)
 
-        return np.array(jacobian)
+            self.jacobian_matrix.append(jacobian)
