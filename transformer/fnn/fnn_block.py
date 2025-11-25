@@ -33,7 +33,9 @@ class FNN:
 
         z = self.input_seq
 
-        print("\n\n=======\n")
+        print("====FNN======")
         for weights, bias in zip(self.weights, self.bias):
             z = z @ weights + bias
-            print(z, end="\n\n")
+
+        print(z)
+        self.output_fnn=z

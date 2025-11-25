@@ -4,17 +4,20 @@ from fnn.fnn_block import FNN
 import numpy as np
 
 # input_seq = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
-input_seq = [[1, 2], [5, 6], [9, 10]]
+# input_seq = [[1, 2], [5, 6], [9, 10]]
+input_seq = [[1.11, 1.45,0.99], [0.99, 1.32,1.44], [0.88, 0.94,1.22]]
 
 
-class Transformer:
+class TransformerBlock:
     def __init__(self, num_layers):
         self.layers = []
 
+        input_to_next_layer=np.array(input_seq)
         for _ in range(num_layers):
+            print("\n\n************ layer **************\n")
 
             # layer norm ------------------------
-            l_n = Norm(np.array(input_seq))
+            l_n = Norm(input_to_next_layer)
             l_n.forward()
             l_n.weight_init()
             l_n.scale()
@@ -36,15 +39,37 @@ class Transformer:
 
             
             # residual  ------------------------
-            residual_connection= np.array(input_seq) + a_b.output_MHA
-            
+            residual_connection_1= np.array(input_to_next_layer) + a_b.output_MHA
+
             print("=========residual connection=========")
-            for i in residual_connection:
+            for i in residual_connection_1:
                 print(i)
 
+            # layer norm ------------------------
+            l_n_2 = Norm(residual_connection_1)
+            l_n_2.forward()
+            l_n_2.weight_init()
+            l_n_2.scale()
+
+            print("=========layer norm=========")
+            for i in l_n_2.normalized_matrix:
+                print(i)
+            for i in l_n_2.scaled_matrix:
+                print(i)
+            
             # FNN  ------------------------
-            fnn = FNN(residual_connection,hidden_layers=3,hidden_size=2)
+            fnn = FNN(l_n_2.scaled_matrix,hidden_layers=3,hidden_size=2)
             fnn.weight_init()
             fnn.forward()
 
-t = Transformer(1)
+            # residual  ------------------------
+            residual_connection_2= residual_connection_1 + fnn.output_fnn
+
+            print("=========residual connection=========")
+            for i in residual_connection_2:
+                print(i)
+
+            input_to_next_layer=residual_connection_2
+
+
+t = TransformerBlock(5)
