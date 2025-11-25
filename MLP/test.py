@@ -2,22 +2,22 @@ from forward_pass import calculate_forward_pass
 
 import pickle
 
-# path="MLP/weights/xor.pkl" # XOR
-path="MLP/weights/addition.pkl" # ADDITION
+# path="ML/MLP/weights/xor.pkl" # XOR
+path = "ML/MLP/weights/addition.pkl"  # ADDITION
 
-with open(path,"rb") as f:
+with open(path, "rb") as f:
     data = pickle.load(f)
 
-input_seq=[900,-2]
+input_seq = [10, 12]
 
 # this will remain the same ----------------
 
-weights=data['weights']
-bias=data['bias']
-ln_w=data['ln_w']
-ln_b=data['ln_b']
+weights = data["weights"]
+bias = data["bias"]
+ln_w = data["ln_w"]
+ln_b = data["ln_b"]
 
 
-result=calculate_forward_pass(input_seq,weights,bias,ln_w,ln_b)
+result = calculate_forward_pass(input_seq, weights, bias, ln_w, ln_b)
 
 print(result[0][-1])

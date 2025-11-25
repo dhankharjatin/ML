@@ -2,12 +2,21 @@ import numpy as np
 
 
 class Norm:
-    def forward(self, matrix, verbose=False):
+    def __init__(self, input_seq):
+        self.input_seq = input_seq
+
+    def weight_init(self):
+        rows, columns = self.input_seq.shape
+
+        self.alpha = np.ones((rows, columns))
+        self.beta = np.zeros((rows, columns))
+
+    def forward(self, verbose=False):
 
         self.normalized_matrix = []
         self.d_and_sd = []
 
-        for lis in matrix:
+        for lis in self.input_seq:
             mean = np.average(lis)
             if verbose:
                 print("\nmean ", mean)
@@ -39,10 +48,13 @@ class Norm:
             self.normalized_matrix.append(normalized_list)
             self.d_and_sd.append([deviations, standard_deviation])
 
-    def create_jacobian(self, matrix):
+    def scale(self):
+        self.scaled_matrix = (self.normalized_matrix * self.alpha) + self.beta
+
+    def create_jacobian(self):
 
         self.jacobian_matrix = []
-        for lis in matrix:
+        for lis in self.d_and_sd:
             deviations = lis[0]
             sd = lis[1]
             length = len(deviations)

@@ -4,7 +4,7 @@ from backpropagation import calculate_gradient
 from update_weights import apply_gradients
 import numpy as np
 
-EPOHS = 200
+EPOHS = 1200
 # input_seq=[[1,2,3,4],[5,6,7,8]]
 # output_seq=[[1,2],[5,6]]
 
@@ -21,7 +21,7 @@ print(len(input_seq))
 print(len(output_seq))
 
 weights, bias, ln_w, ln_b = initialize_weights(
-    len(input_seq[0]), len(output_seq[0]), hidden_size=3, hidden_layers=2
+    len(input_seq[0]), len(output_seq[0]), hidden_size=4, hidden_layers=2
 )
 
 # print("weights")
@@ -92,7 +92,7 @@ for _ in range(EPOHS):
             b_gradients,
             alpha_gradients,
             beta_gradients,
-            lr=1,
+            lr=0.1,
         )
     print("--------------")
 

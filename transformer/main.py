@@ -1,30 +1,50 @@
-# from attention.attention_block import AttentionBlock
-
-input_seq = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
-# # input_seq = [[1, 1.1, 1.2, 1.3], [1.1, 1.2,1.3, 1.4], [1.2, 1.3, 1.4, 1.5]]
-
-# nn = AttentionBlock(input_seq=input_seq, num_heads=2, verbose=True)
-# nn.weight_init()
-# nn.forward_pass()
-# # nn.backpropagation()
-
+from attention.attention_block import AttentionBlock
 from LayerNorm.ln import Norm
+from fnn.fnn_block import FNN
 import numpy as np
 
-f = Norm()
+# input_seq = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
+input_seq = [[1, 2], [5, 6], [9, 10]]
 
-norm_lis, values = f.forward(np.array([input_seq[0]]))
 
-print(norm_lis, end="\n\n")
-print(values, end="\n\n")
+class Transformer:
+    def __init__(self, num_layers):
+        self.layers = []
 
-for i in norm_lis:
-    print(i)
-for i in values:
-    print(i)
+        for _ in range(num_layers):
 
-j_matrix = f.create_jacobian(values)
+            # layer norm ------------------------
+            l_n = Norm(np.array(input_seq))
+            l_n.forward()
+            l_n.weight_init()
+            l_n.scale()
 
-print()
-for i in j_matrix:
-    print(i, end="\n\n")
+            print("=========layer norm=========")
+            for i in l_n.normalized_matrix:
+                print(i)
+            for i in l_n.scaled_matrix:
+                print(i)
+
+            # MHA ------------------------
+            a_b = AttentionBlock(input_seq=l_n.scaled_matrix,num_heads=2)
+            a_b.weight_init()
+            a_b.forward_pass()
+
+            print("=========MHA=========")
+            for i in a_b.output_MHA:
+                print(i)
+
+            
+            # residual  ------------------------
+            residual_connection= np.array(input_seq) + a_b.output_MHA
+            
+            print("=========residual connection=========")
+            for i in residual_connection:
+                print(i)
+
+            # FNN  ------------------------
+            fnn = FNN(residual_connection,hidden_layers=3,hidden_size=2)
+            fnn.weight_init()
+            fnn.forward()
+
+t = Transformer(1)
