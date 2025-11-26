@@ -29,9 +29,10 @@ class FNN:
             self.weights.append(w)
             self.bias.append(b)
 
-    def forward(self):
+    def forward(self,input_from_last_layer):
 
-        z = self.input_seq
+
+        z = input_from_last_layer
 
         print("====FNN======")
         for weights, bias in zip(self.weights, self.bias):

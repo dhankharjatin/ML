@@ -2,8 +2,8 @@ import numpy as np
 
 
 class Norm:
-    def __init__(self, input_seq):
-        self.input_seq = input_seq
+    def __init__(self,input_seq):
+        self.input_seq= input_seq
 
     def weight_init(self):
         rows, columns = self.input_seq.shape
@@ -11,12 +11,13 @@ class Norm:
         self.alpha = np.ones((rows, columns))
         self.beta = np.zeros((rows, columns))
 
-    def forward(self, verbose=False):
+    def forward(self,input_from_last_layer, verbose=False):
 
+        self.input_from_last_layer = input_from_last_layer
         self.normalized_matrix = []
         self.d_and_sd = []
 
-        for lis in self.input_seq:
+        for lis in self.input_from_last_layer:
             mean = np.average(lis)
             if verbose:
                 print("\nmean ", mean)

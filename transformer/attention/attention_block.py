@@ -1,8 +1,9 @@
 import numpy as np
 
 class AttentionBlock:
-    def __init__(self,input_seq,num_heads,verbose=False):
-        self.input_seq=np.array(input_seq)
+    def __init__(self,num_heads,input_seq,verbose=False):
+        
+        self.input_seq=input_seq
         self.num_heads=num_heads
         self.verbose=verbose
     
@@ -19,12 +20,11 @@ class AttentionBlock:
 
     def weight_init(self):
 
-        rows, columns = self.input_seq.shape
-        
-        self.q = np.random.rand(columns, columns)
-        self.k = np.random.rand(columns, columns)
-        self.v = np.random.rand(columns, columns)
-        self.wo = np.random.rand(columns, columns)
+        rows ,column=self.input_seq.shape
+        self.q = np.random.rand(column, column)
+        self.k = np.random.rand(column, column)
+        self.v = np.random.rand(column, column)
+        self.wo = np.random.rand(column, column)
 
         # self.q = np.array(
         #     [
@@ -60,22 +60,18 @@ class AttentionBlock:
         #     ]
         # )
 
-
-        # Linear projection
-        self.Q = self.input_seq @ self.q
-        self.K = self.input_seq @ self.k
-        self.V = self.input_seq @ self.v
-
         if self.verbose:
-            print(f"============ initial weights ============\n\n q => {self.q}\n\nk => {self.k}\n\nv => {self.v}\n\n")
+            print(f"============ initial weights ============\n\n q => {self.q}\n\nk => {self.k}\n\nv => {self.v}\n\nwo => {self.wo}")
 
 
-    def forward_pass(self):
+    def forward_pass(self,input_from_last_layer):
+        
+        self.input_from_last_layer=input_from_last_layer
 
         # Linear projection
-        self.Q = self.input_seq @ self.q
-        self.K = self.input_seq @ self.k
-        self.V = self.input_seq @ self.v
+        self.Q = self.input_from_last_layer @ self.q
+        self.K = self.input_from_last_layer @ self.k
+        self.V = self.input_from_last_layer @ self.v
 
         if self.verbose:
             print(f"============ Linear projection ============\n\n inp.q => {self.Q}\n\ninp.k => {self.K}\n\ninp.v => {self.V}\n\n")
