@@ -3,7 +3,7 @@ import numpy as np
 class AttentionBlock:
     def __init__(self,num_heads,input_seq,verbose=False):
         
-        self.input_seq=input_seq
+        self.input_seq=np.array(input_seq)
         self.num_heads=num_heads
         self.verbose=verbose
     
@@ -60,13 +60,13 @@ class AttentionBlock:
         #     ]
         # )
 
-        if self.verbose:
-            print(f"============ initial weights ============\n\n q => {self.q}\n\nk => {self.k}\n\nv => {self.v}\n\nwo => {self.wo}")
+        # if self.verbose:
+        #     print(f"============ initial weights ============\n\n q => {self.q}\n\nk => {self.k}\n\nv => {self.v}\n\nwo => {self.wo}")
 
 
     def forward_pass(self,input_from_last_layer):
         
-        self.input_from_last_layer=input_from_last_layer
+        self.input_from_last_layer=np.array(input_from_last_layer)
 
         # Linear projection
         self.Q = self.input_from_last_layer @ self.q
@@ -85,7 +85,6 @@ class AttentionBlock:
         self.Qs = np.array_split(self.Q, self.num_heads, axis=1)
         self.Ks = np.array_split(self.K, self.num_heads, axis=1)
         self.Vs = np.array_split(self.V, self.num_heads, axis=1)
-
 
         self.D_k = columns/self.num_heads
 

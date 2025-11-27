@@ -50,7 +50,7 @@ class Norm:
             self.d_and_sd.append([deviations, standard_deviation])
 
     def scale(self):
-        self.scaled_matrix = (self.normalized_matrix * self.alpha) + self.beta
+        self.scaled_matrix = (np.array(self.normalized_matrix) * self.alpha) + self.beta
 
     def create_jacobian(self):
 

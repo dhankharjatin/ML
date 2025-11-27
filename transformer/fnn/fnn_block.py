@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class FNN:
     def __init__(self, input_seq, hidden_size, hidden_layers):
         self.input_seq = input_seq
@@ -32,11 +31,12 @@ class FNN:
     def forward(self,input_from_last_layer):
 
 
+        self.f_pass_values=[]
+
         z = input_from_last_layer
 
-        print("====FNN======")
+
         for weights, bias in zip(self.weights, self.bias):
             z = z @ weights + bias
-
-        print(z)
+            
         self.output_fnn=z
