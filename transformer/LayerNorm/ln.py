@@ -76,3 +76,16 @@ class Norm:
                 jacobian.append(temp)
 
             self.jacobian_matrix.append(jacobian)
+        self.jacobian_matrix=np.array(self.jacobian_matrix)
+
+    def backpropagation(self,gradient_from_last_layer,jacobian_matrix):
+        gradient=gradient_from_last_layer * self.input_from_last_layer
+        print(gradient,end="\n\n")
+        print(jacobian_matrix,end="\n\n")
+
+        gradient_to_next_layer=[]
+        for idx,i in enumerate(jacobian_matrix):
+            gradient_to_next_layer.append(i @ gradient[idx].T)
+
+        gradient_to_next_layer=np.array(gradient_to_next_layer)
+        print(gradient_to_next_layer)

@@ -4,9 +4,9 @@ from fnn.fnn_block import FNN
 import numpy as np
 from Utils.display_weights import show
 
-input_seq = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
+# input_seq = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
 # input_seq = [[1, 2], [5, 6], [9, 10]]
-# input_seq = [[1.11, 1.45, 0.99], [0.99, 1.32, 1.44], [0.88, 0.94, 1.22]]
+input_seq = [[1.11, 1.45, 0.99], [0.99, 1.32, 1.44], [0.88, 0.94, 1.22]]
 
 
 class TransformerBlock:
@@ -38,9 +38,9 @@ class TransformerBlock:
 
     def forward_pass(self):
 
+        self.output_from_last_layer=self.input_seq
         self.forward_pass_values=[]
 
-        self.output_from_last_layer=self.input_seq
 
         for layer in self.layers:
             ln_1 : Norm=layer[0]
@@ -61,7 +61,7 @@ class TransformerBlock:
 
             fnn.forward(input_from_last_layer=ln_2.scaled_matrix)
 
-            residual_connection_2=residual_connection_1+fnn.output_fnn
+            residual_connection_2=residual_connection_1+fnn.f_pass_values[-1]
 
             self.output_from_last_layer=residual_connection_2
 
@@ -73,7 +73,7 @@ class TransformerBlock:
                     residual_connection_1,
                     ln_2.normalized_matrix,
                     ln_2.scaled_matrix,
-                    fnn.output_fnn,
+                    fnn.f_pass_values[-1],
                     residual_connection_2,
                 ]
             )
@@ -90,3 +90,16 @@ class TransformerBlock:
 
 # ==========================================================================================
 
+# f=FNN(input_seq=np.array(input_seq),hidden_size=1,hidden_layers=2)
+# f.weight_init()
+# for i in f.weights:
+#     print(i,end="\n\n")
+# f.forward(input_from_last_layer=np.array(input_seq))
+# f.backpropagation(np.eye(3,2))
+
+l=Norm(input_seq=np.array(input_seq))
+l.weight_init()
+l.forward(input_from_last_layer=np.array(input_seq))
+
+l.create_jacobian()
+l.backpropagation(np.eye(3,3),l.jacobian_matrix)
