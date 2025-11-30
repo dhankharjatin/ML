@@ -5,8 +5,9 @@ import numpy as np
 from Utils.display_weights import show
 
 # input_seq = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
-# input_seq = [[1, 2], [5, 6], [9, 10]]
-input_seq = [[1.11, 1.45, 0.99], [0.99, 1.32, 1.44], [0.88, 0.94, 1.22]]
+# input_seq = [[1, 1], [1, 1]]
+# input_seq = [[1.11, 1.45, 0.99], [0.99, 1.32, 1.44], [0.88, 0.94, 1.22]]
+input_seq = [[1.11, 1.45, 0.99,1.00], [0.99, 1.32, 1.44,1.1], [0.88, 0.94, 1.22,.77]]
 
 
 class TransformerBlock:
@@ -97,9 +98,14 @@ class TransformerBlock:
 # f.forward(input_from_last_layer=np.array(input_seq))
 # f.backpropagation(np.eye(3,2))
 
-l=Norm(input_seq=np.array(input_seq))
-l.weight_init()
-l.forward(input_from_last_layer=np.array(input_seq))
+# l=Norm(input_seq=np.array(input_seq))
+# l.weight_init()
+# l.forward(input_from_last_layer=np.array(input_seq))
 
-l.create_jacobian()
-l.backpropagation(np.eye(3,3),l.jacobian_matrix)
+# l.create_jacobian()
+# l.backpropagation(np.eye(3,3),l.jacobian_matrix)
+
+a=AttentionBlock(num_heads=2,input_seq=np.array(input_seq),verbose=True)
+a.weight_init()
+a.forward_pass(input_from_last_layer=np.array(input_seq))
+a.backpropagation(gradient_from_last_layer=np.eye(3,4)) 
