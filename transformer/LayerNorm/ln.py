@@ -79,13 +79,25 @@ class Norm:
         self.jacobian_matrix=np.array(self.jacobian_matrix)
 
     def backpropagation(self,gradient_from_last_layer,jacobian_matrix):
-        gradient=gradient_from_last_layer * self.input_from_last_layer
-        print(gradient,end="\n\n")
-        print(jacobian_matrix,end="\n\n")
 
-        gradient_to_next_layer=[]
+        self.gradient_from_last_layer=gradient_from_last_layer
+        
+        self.gradient=self.gradient_from_last_layer * self.input_from_last_layer
+
+        print(self.gradient,end="\n\n")
+
+        self.gradient_to_next_layer=[]
         for idx,i in enumerate(jacobian_matrix):
-            gradient_to_next_layer.append(i @ gradient[idx].T)
+            self.gradient_to_next_layer.append(i @ self.gradient[idx].T)
 
-        gradient_to_next_layer=np.array(gradient_to_next_layer)
-        print(gradient_to_next_layer)
+        self.gradient_to_next_layer=np.array(self.gradient_to_next_layer)
+
+    
+    def update_weights(self,lr):
+        self.alpha -= self.gradient * lr
+        self.beta -= self.gradient_from_last_layer * lr
+
+
+        print("\n\n========== updated weight ===============\n")
+        print("alpha => ",self.alpha,end="\n\n")
+        print("beta => ",self.beta,end="\n\n")

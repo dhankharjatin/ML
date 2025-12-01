@@ -55,12 +55,12 @@ class FNN:
             layer_out=[]
 
             z = z @ weights + bias
-            print("z @ w + b",z,end="\n\n")
+            # print("z @ w + b",z,end="\n\n")
             layer_out.append(z)
 
             if idx < len(self.weights) - 1:
                 z = FNN.handel_activation(z)
-                print("ReLU",z,end="\n\n")
+                # print("ReLU",z,end="\n\n")
                 layer_out.append(z)
 
             self.f_pass_values.append(layer_out)
@@ -68,44 +68,38 @@ class FNN:
 
     def backpropagation(self,gradient_from_last_layer):
         
+        self.weight_and_bias_gradients=[]
         print("============== bp ===============\n")
         f_pass=self.f_pass_values[::-1]
         weights=self.weights[::-1]
 
         gradient=gradient_from_last_layer
 
-        # =========================================================
-        # delta = f_pass[1][0].T @ gradient
-        # print(delta,end="\n\n")
-
-        # =========================================================        
-        # gradient = gradient @ weights[0].T * f_pass[1][0]
-
-        # delta = gradient.T @ f_pass[2][0]
-        # print(delta,end="\n\n")
-
-        # # =========================================================
-        # gradient = gradient @ weights[1].T * f_pass[2][0]
-
-        # delta = self.input_from_last_layer.T @ gradient 
-        # print(delta,end="\n\n")
-
         for idx in range(len(f_pass)):
             if idx==0:
                 delta = f_pass[idx+1][0].T @ gradient  
-                print(delta,end="\n\n")
+                # print(delta,end="\n\n")
 
             elif idx==len(f_pass)-1:
                 gradient= (gradient @ weights[idx-1].T )* f_pass[idx][0]
                 delta = self.input_from_last_layer.T @ gradient 
-                print(delta,end="\n\n")
+                # print(delta,end="\n\n")
 
 
             else:
                 gradient= (gradient @ weights[idx-1].T ) * f_pass[idx][0]
 
                 delta =gradient.T @ f_pass[idx+1][0] 
-                print(delta,end="\n\n")
+                # print(delta,end="\n\n")
+
+            self.weight_and_bias_gradients.append([gradient,delta])
         
-        gradient_to_next_layer=gradient @ weights[-1].T
-        print("->>>>>>",gradient_to_next_layer)
+        self.gradient_to_next_layer=gradient @ weights[-1].T
+        # print("->>>>>>",gradient_to_next_layer)
+
+    def update_weights(self,lr):
+        for update,weight,bias, in zip(self.weight_and_bias_gradients[::-1],self.weights,self.bias):
+            bias -= update[0] * lr 
+            weight -= update[1] * lr
+
+         

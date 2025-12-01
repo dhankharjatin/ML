@@ -37,7 +37,7 @@ class AttentionBlock:
                 [0.1, 0.2, 0.3, 0.4],
                 [0.1, 0.2, 0.3, 0.4],
                 [0.1, 0.2, 0.3, 0.4],
-            ]
+            ],dtype=np.float64
         )
         self.k = np.array(
             [
@@ -45,7 +45,7 @@ class AttentionBlock:
                 [0.5, 0.6, 0.7, 0.8],
                 [0.9, 1.0, 1.1, 1.2],
                 [1.3, 1.4, 1.5, 1.6],
-            ]
+            ],dtype=np.float64
         )
         self.v = np.array(
             [
@@ -53,7 +53,7 @@ class AttentionBlock:
                 [0.2, 0.2, 0.2, 0.2],
                 [0.3, 0.3, 0.3, 0.3],
                 [0.4, 0.4, 0.4, 0.4],
-            ]
+            ],dtype=np.float64
         )
 
         self.wo = np.array(
@@ -62,7 +62,7 @@ class AttentionBlock:
                 [0, 1, 0, 0],
                 [0, 0, 1, 0],
                 [0, 0, 0, 1],
-            ]
+            ],dtype=np.float64
         )
 
         if self.verbose:
@@ -81,6 +81,8 @@ class AttentionBlock:
         if self.verbose:
             print(f"============ Linear projection ============\n\n inp.q => {self.Q}\n\ninp.k => {self.K}\n\ninp.v => {self.V}\n\n")
         
+        print(self.Q)
+        print(self.Q.shape)
         rows, columns = self.Q.shape
 
         if columns % self.num_heads != 0:
@@ -145,8 +147,8 @@ class AttentionBlock:
 
         print("\n\n============= bakpropagation ======================= \n\n")
 
-        delta=gradient_from_last_layer.T @ self.combined_matrix
-        print(delta,end="\n\n")
+        self.delta=gradient_from_last_layer.T @ self.combined_matrix
+        print(self.delta,end="\n\n")
 
         gradient=gradient_from_last_layer @ self.wo
         
@@ -209,3 +211,18 @@ class AttentionBlock:
         self.gradient_to_next_layer = (self.gqs @ self.q ) + (self.gks @ self.q ) + (self.gvs @ self.q ) 
 
         print(self.gradient_to_next_layer)
+
+
+    def update_weights(self,lr):
+        self.q -= self.total_gradient_q * lr
+        self.k -= self.total_gradient_k * lr
+        self.v -= self.total_gradient_v * lr
+
+        self.wo -= self.delta * lr
+
+        
+        print("\n\n========== updated weight ===============\n")
+        print("q => ",self.q,end="\n\n")
+        print("k => ",self.k,end="\n\n")
+        print("v => ",self.v,end="\n\n")
+        print("wo => ",self.wo,end="\n\n")
