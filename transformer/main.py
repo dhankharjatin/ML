@@ -86,20 +86,52 @@ class TransformerBlock:
 
         self.error = 0.5 * np.sum(self.loss ** 2)
 
+    def backpropagation(self,lr):
+        delta_t_out_weight= self.output_from_last_layer.T @ self.loss
+        self.t_output_weight -= delta_t_out_weight * lr
+        
+        gradient=self.loss @ self.t_output_weight.T
 
+        for layer in self.layers[::-1]:
+            fnn:FNN = layer[-1]
+            ln_2:Norm = layer[-2]
+            attention_block:AttentionBlock = layer[-3]
+            ln_1:Norm = layer[-4]
+
+            fnn.backpropagation(gradient_from_last_layer=gradient)
+            fnn.update_weights(lr=lr)
+
+            ln_2.create_jacobian()
+            ln_2.backpropagation(gradient_from_last_layer=fnn.gradient_to_next_layer,jacobian_matrix=ln_2.jacobian_matrix)
+            ln_2.update_weights(lr=lr)
+
+            attention_block.backpropagation(gradient_from_last_layer=ln_2.gradient_to_next_layer)
+            attention_block.update_weights(lr=lr)
+
+            ln_1.create_jacobian()
+            ln_1.backpropagation(gradient_from_last_layer=attention_block.gradient_to_next_layer,jacobian_matrix=ln_1.jacobian_matrix)
+            ln_1.update_weights(lr=lr)
+
+            gradient=ln_1.gradient_to_next_layer
 
 t = TransformerBlock(input_seq=input_seq,output_seq=output_seq,num_attention_heads=2,num_transformer_layers=2,fnn_hidden_size=3,fnn_hidden_layers=2)
-t.forward_pass()
 
-for i in t.forward_pass_values:
 
-    print("\n\n------------ ------------------\n")
-    for j in i:
-        print(j,end="\n\n")
+EPOCHS=5
+for _ in range(EPOCHS):
+    t.forward_pass()
+    print("--------------------")
+    t.backpropagation(lr=0.01)
+    print()
+# for i in t.forward_pass_values:
 
-print("output => ",t.t_output)
-print(t.loss)
-print(t.error)
+#     print("\n\n------------ ------------------\n")
+#     for j in i:
+#         print(j,end="\n\n")
+
+# print("output => ",t.t_output)
+# print(t.loss)
+# print(t.error)
 
 # ==========================================================================================
 

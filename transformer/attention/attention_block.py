@@ -21,52 +21,52 @@ class AttentionBlock:
     def weight_init(self):
 
         rows ,column=self.input_seq.shape
-        # self.q = np.random.rand(column, column)
-        # self.k = np.random.rand(column, column)
-        # self.v = np.random.rand(column, column)
-        # self.wo = np.random.rand(column, column)
+        self.q = np.random.rand(column, column)
+        self.k = np.random.rand(column, column)
+        self.v = np.random.rand(column, column)
+        self.wo = np.random.rand(column, column)
 
         # self.q = np.ones((column, column))
         # self.k = np.ones((column, column))
         # self.v = np.ones((column, column))
         # self.wo = np.ones((column, column))
 
-        self.q = np.array(
-            [
-                [0.1, 0.2, 0.3, 0.4],
-                [0.1, 0.2, 0.3, 0.4],
-                [0.1, 0.2, 0.3, 0.4],
-                [0.1, 0.2, 0.3, 0.4],
-            ],dtype=np.float64
-        )
-        self.k = np.array(
-            [
-                [0.1, 0.2, 0.3, 0.4],
-                [0.5, 0.6, 0.7, 0.8],
-                [0.9, 1.0, 1.1, 1.2],
-                [1.3, 1.4, 1.5, 1.6],
-            ],dtype=np.float64
-        )
-        self.v = np.array(
-            [
-                [0.1, 0.1, 0.1, 0.1],
-                [0.2, 0.2, 0.2, 0.2],
-                [0.3, 0.3, 0.3, 0.3],
-                [0.4, 0.4, 0.4, 0.4],
-            ],dtype=np.float64
-        )
+        # self.q = np.array(
+        #     [
+        #         [0.1, 0.2, 0.3, 0.4],
+        #         [0.1, 0.2, 0.3, 0.4],
+        #         [0.1, 0.2, 0.3, 0.4],
+        #         [0.1, 0.2, 0.3, 0.4],
+        #     ],dtype=np.float64
+        # )
+        # self.k = np.array(
+        #     [
+        #         [0.1, 0.2, 0.3, 0.4],
+        #         [0.5, 0.6, 0.7, 0.8],
+        #         [0.9, 1.0, 1.1, 1.2],
+        #         [1.3, 1.4, 1.5, 1.6],
+        #     ],dtype=np.float64
+        # )
+        # self.v = np.array(
+        #     [
+        #         [0.1, 0.1, 0.1, 0.1],
+        #         [0.2, 0.2, 0.2, 0.2],
+        #         [0.3, 0.3, 0.3, 0.3],
+        #         [0.4, 0.4, 0.4, 0.4],
+        #     ],dtype=np.float64
+        # )
 
-        self.wo = np.array(
-            [
-                [1, 0, 0, 0],
-                [0, 1, 0, 0],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1],
-            ],dtype=np.float64
-        )
+        # self.wo = np.array(
+        #     [
+        #         [1, 0, 0, 0],
+        #         [0, 1, 0, 0],
+        #         [0, 0, 1, 0],
+        #         [0, 0, 0, 1],
+        #     ],dtype=np.float64
+        # )
 
-        if self.verbose:
-            print(f"============ initial weights ============\n\n q => {self.q}\n\nk => {self.k}\n\nv => {self.v}\n\nwo => {self.wo}")
+        # if self.verbose:
+        #     print(f"============ initial weights ============\n\n q => {self.q}\n\nk => {self.k}\n\nv => {self.v}\n\nwo => {self.wo}")
 
 
     def forward_pass(self,input_from_last_layer):

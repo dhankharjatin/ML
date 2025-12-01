@@ -3,25 +3,29 @@ from forward_pass import calculate_forward_pass
 from backpropagation import calculate_gradient
 from update_weights import apply_gradients
 import numpy as np
+import matplotlib.pyplot as plt
 
-EPOHS = 1200
+EPOHS = 500
 # input_seq=[[1,2,3,4],[5,6,7,8]]
 # output_seq=[[1,2],[5,6]]
 
 # input_seq=[1,2]
 # output_seq=[.1,.2]
 
-input_seq = [[1, 1], [0, 0], [0, 1], [1, 0]]
-output_seq = [[1], [1], [0], [0]]
+# input_seq = [[1, 1], [0, 0], [0, 1], [1, 0]]
+# output_seq = [[1], [1], [0], [0]]
 
 # input_seq=[[1,1],[10,1],[5,6],[1,5],[3,11],[2,3],[5,7],[2,7],[4,15],[4,4],[10,10],[3,3],[4,6],[8,5],[7,1],[4,12],[4,7],[5,9]]
 # output_seq=[[2],[11],[11],[6],[14],[5],[12],[9],[19],[8],[20],[6],[10],[13],[8],[16],[11],[14]]
+
+input_seq = [[1,2,3], [5,9,8], [10,10,10], [11,1,12],[5,4,3],[9,8,9],[9,1,1],[1,3,3],[2,0,4],[5,1,9],[0,5,10],[3,13,12],[4,5,7],[1,1,1]]
+output_seq = [[3,2,1], [8,9,5], [10,10,10], [12,1,11],[3,4,5],[9,8,8],[1,1,9],[3,3,1],[4,0,2],[9,1,5],[10,5,0],[12,13,3],[7,5,4],[1,1,1]]
 
 print(len(input_seq))
 print(len(output_seq))
 
 weights, bias, ln_w, ln_b = initialize_weights(
-    len(input_seq[0]), len(output_seq[0]), hidden_size=4, hidden_layers=2
+    len(input_seq[0]), len(output_seq[0]), hidden_size=10, hidden_layers=2
 )
 
 # print("weights")
@@ -37,8 +41,9 @@ weights, bias, ln_w, ln_b = initialize_weights(
 # for i in ln_b:
 #     print(i,end="\n\n")
 
+all_errors=[]
 for _ in range(EPOHS):
-
+    total_error=0
     for idx in range(len(input_seq)):
 
         f_pass, mean_deviation_sd, z, z_scale, z_norm = calculate_forward_pass(
@@ -47,13 +52,13 @@ for _ in range(EPOHS):
 
         loss = f_pass[-1] - output_seq[idx]
 
-        error = []
-        for i in loss:
-            error.append(i**2)
+        error = 0.5 * np.sum(loss ** 2)
 
         print("PREDICITION ", f_pass[-1], end="   ")
         print("LOSS ", loss, end="   ")
-        print("ERROR ", 0.5 * sum(error), end="    \n")
+        print("ERROR ", error, end="    \n")
+        
+        total_error+=error
 
         gradients, b_gradients, alpha_gradients, beta_gradients = calculate_gradient(
             input_seq[idx],
@@ -92,9 +97,11 @@ for _ in range(EPOHS):
             b_gradients,
             alpha_gradients,
             beta_gradients,
-            lr=0.1,
+            lr=0.01,
         )
     print("--------------")
+    all_errors.append(total_error/len(input_seq))
+
 
 data = {}
 
@@ -114,12 +121,15 @@ data = {}
 # # Save everything in one .npz file
 # np.savez("MLP/weights/xor.npz", **data)
 
+plt.plot(all_errors)
+plt.show()
+
 import pickle
 
 confirm = input("save weights (y/n)? ")
 
 if confirm == "y":
-    with open("MLP/weights/addition.pkl", "wb") as f:
+    with open("MLP/weights/copy.pkl", "wb") as f:
         pickle.dump({"weights": weights, "bias": bias, "ln_w": ln_w, "ln_b": ln_b}, f)
     print("saved")
 else:
