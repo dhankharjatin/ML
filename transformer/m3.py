@@ -7,11 +7,11 @@ from Utils.display_weights import show
 # input_seq = [[1, 1], [1, 1]]
 # input_seq = [[1.11, 1.45, 0.99], [0.99, 1.32, 1.44], [0.88, 0.94, 1.22]]
 
-# input_seq = [[1.11, 1.45, 0.99,1.00], [0.99, 1.32, 1.44,1.1], [0.88, 0.94, 1.22,.77]]
-# output_seq=[[1,2],[2,3],[3,4]]
+input_seq = [[1.11, 1.45, 0.99,1.00], [0.99, 1.32, 1.44,1.1], [0.88, 0.94, 1.22,.77]]
+output_seq=[[1,2],[2,3],[3,4]]
 
-input_seq = [[0,0], [1,1], [1,0],[0,1]]
-output_seq=[[1],[1],[0],[0]]
+# input_seq = [[0,0], [1,1], [1,0],[0,1]]
+# output_seq=[[1],[1],[0],[0]]
 
 class TransformerBlock:
     def __init__(self, input_seq, output_seq,num_transformer_layers, num_attention_heads,fnn_hidden_size,fnn_hidden_layers):
@@ -89,37 +89,92 @@ class TransformerBlock:
 
         self.error = 0.5 * np.sum(self.loss ** 2)
 
-    def backpropagation(self,lr):
-        delta_t_out_weight= self.output_from_last_layer.T @ self.loss
-        self.t_output_weight -= delta_t_out_weight * lr
-        
-        gradient=self.loss @ self.t_output_weight.T
+    def backpropagation(self, lr):
 
-        for layer in self.layers[::-1]:
-            fnn:FNN = layer[-1]
-            ln_2:Norm = layer[-2]
-            attention_block:AttentionBlock = layer[-3]
-            ln_1:Norm = layer[-4]
+        # ----- FINAL LINEAR LAYER -----
+        delta_t_out_weight = self.output_from_last_layer.T @ self.loss
+        self.t_output_weight -= lr * delta_t_out_weight
 
-            fnn.backpropagation(gradient_from_last_layer=gradient)
+        # gradient flowing into last transformer block
+        gradient = self.loss @ self.t_output_weight.T
+
+
+        # ----- BACKWARD THROUGH ALL TRANSFORMER LAYERS -----
+        for layer_idx, layer in enumerate(self.layers[::-1]):
+
+            fnn: FNN = layer[-1]
+            ln_2: Norm = layer[-2]
+            attention_block: AttentionBlock = layer[-3]
+            ln_1: Norm = layer[-4]
+
+            # ===================================================
+            #   RESIDUAL CONNECTION 2
+            #   residual_2 = residual_1 + fnn_output
+            # ===================================================
+
+            # gradient flows BOTH to fnn_output AND residual_1
+            grad_to_fnn_output = gradient        # branch 1
+            grad_to_residual_1 = gradient.copy() # branch 2 (identity path)
+
+            # ----- FNN -----
+            fnn.backpropagation(gradient_from_last_layer=grad_to_fnn_output)
             fnn.update_weights(lr=lr)
 
+            gradient = fnn.gradient_to_next_layer + grad_to_residual_1
+            # now gradient = dL/d(residual_1)
+
+
+            # ===================================================
+            #   LAYER NORM 2
+            # ===================================================
             ln_2.create_jacobian()
-            ln_2.backpropagation(gradient_from_last_layer=fnn.gradient_to_next_layer,jacobian_matrix=ln_2.jacobian_matrix)
+            ln_2.backpropagation(
+                gradient_from_last_layer=gradient,
+                jacobian_matrix=ln_2.jacobian_matrix
+            )
             ln_2.update_weights(lr=lr)
 
-            attention_block.backpropagation(gradient_from_last_layer=ln_2.gradient_to_next_layer)
+            gradient = ln_2.gradient_to_next_layer
+            # now gradient = dL/d(residual_1 BEFORE LN2)
+
+
+            # ===================================================
+            #   RESIDUAL CONNECTION 1
+            #   residual_1 = input_prev + mha_output
+            # ===================================================
+
+            grad_to_mha_output = gradient         # branch 1
+            grad_to_input_prev = gradient.copy()  # branch 2 (identity path)
+
+
+            # ----- ATTENTION BLOCK -----
+            attention_block.backpropagation(
+                gradient_from_last_layer=grad_to_mha_output
+            )
             attention_block.update_weights(lr=lr)
 
+            gradient = attention_block.gradient_to_next_layer + grad_to_input_prev
+            # now gradient = dL/d(input_before_ln1)
+
+
+            # ===================================================
+            #   LAYER NORM 1
+            # ===================================================
             ln_1.create_jacobian()
-            ln_1.backpropagation(gradient_from_last_layer=attention_block.gradient_to_next_layer,jacobian_matrix=ln_1.jacobian_matrix)
+            ln_1.backpropagation(
+                gradient_from_last_layer=gradient,
+                jacobian_matrix=ln_1.jacobian_matrix
+            )
             ln_1.update_weights(lr=lr)
 
-            gradient=ln_1.gradient_to_next_layer
+            gradient = ln_1.gradient_to_next_layer
+            # final gradient passed into next lower layer
 
-t = TransformerBlock(input_seq=input_seq,output_seq=output_seq,num_attention_heads=4,num_transformer_layers=2,fnn_hidden_size=6,fnn_hidden_layers=1)
 
-EPOCHS=100
+
+t = TransformerBlock(input_seq=input_seq,output_seq=output_seq,num_attention_heads=2,num_transformer_layers=2,fnn_hidden_size=3,fnn_hidden_layers=2)
+
+EPOCHS=50
 for _ in range(EPOCHS):
     t.forward_pass()
     print(f"PREDICTION -> {np.array(t.t_output).T} LOSS -> {np.array(t.loss).T} ERROR -> {t.error}")

@@ -65,8 +65,8 @@ class AttentionBlock:
         #     ],dtype=np.float64
         # )
 
-        # if self.verbose:
-        #     print(f"============ initial weights ============\n\n q => {self.q}\n\nk => {self.k}\n\nv => {self.v}\n\nwo => {self.wo}")
+        if self.verbose:
+            print(f"============ initial weights ============\n\n q => {self.q}\n\nk => {self.k}\n\nv => {self.v}\n\nwo => {self.wo}")
 
 
     def forward_pass(self,input_from_last_layer):
@@ -81,8 +81,6 @@ class AttentionBlock:
         if self.verbose:
             print(f"============ Linear projection ============\n\n inp.q => {self.Q}\n\ninp.k => {self.K}\n\ninp.v => {self.V}\n\n")
         
-        print(self.Q)
-        print(self.Q.shape)
         rows, columns = self.Q.shape
 
         if columns % self.num_heads != 0:
@@ -111,7 +109,8 @@ class AttentionBlock:
         
         # creating mask
         self.masking_matrix=np.triu(np.ones((rows,rows)),k=1)*-1e9
-        print("masking matrix -> ",self.masking_matrix)
+        if self.verbose:
+            print("masking matrix -> ",self.masking_matrix,end="\n\n")
 
         self.all_softmax_masked_score=[]
 
@@ -123,7 +122,6 @@ class AttentionBlock:
             self.softmax_masked_score = self.softmax(self.masked_score)
             self.attention_score = self.softmax_masked_score @ self.Vs[idx]
             self.output_matrix.append(self.attention_score)
-        
 
             self.all_softmax_masked_score.append(self.softmax_masked_score)
             
@@ -145,10 +143,10 @@ class AttentionBlock:
 
     def backpropagation(self,gradient_from_last_layer):
 
-        print("\n\n============= bakpropagation ======================= \n\n")
+        # print("\n\n============= bakpropagation ======================= \n\n")
 
         self.delta=gradient_from_last_layer.T @ self.combined_matrix
-        print(self.delta,end="\n\n")
+        # print(self.delta,end="\n\n")
 
         gradient=gradient_from_last_layer @ self.wo
         
@@ -200,9 +198,9 @@ class AttentionBlock:
         self.total_gradient_v=np.concat(self.gradient_v,axis=1)
         self.total_gradient_k=np.concat(self.gradient_k,axis=1)
 
-        print(self.total_gradient_q,end="\n\n")
-        print(self.total_gradient_k,end="\n\n")
-        print(self.total_gradient_v,end="\n\n")
+        # print(self.total_gradient_q,end="\n\n")
+        # print(self.total_gradient_k,end="\n\n")
+        # print(self.total_gradient_v,end="\n\n")
 
         self.gqs=np.concat(self.gqs,axis=1)
         self.gks=np.concat(self.gks,axis=1)
@@ -210,7 +208,7 @@ class AttentionBlock:
 
         self.gradient_to_next_layer = (self.gqs @ self.q ) + (self.gks @ self.q ) + (self.gvs @ self.q ) 
 
-        print(self.gradient_to_next_layer)
+        # print(self.gradient_to_next_layer)
 
 
     def update_weights(self,lr):
@@ -221,8 +219,8 @@ class AttentionBlock:
         self.wo -= self.delta * lr
 
         
-        print("\n\n========== updated weight ===============\n")
-        print("q => ",self.q,end="\n\n")
-        print("k => ",self.k,end="\n\n")
-        print("v => ",self.v,end="\n\n")
-        print("wo => ",self.wo,end="\n\n")
+        # print("\n\n========== updated weight ===============\n")
+        # print("q => ",self.q,end="\n\n")
+        # print("k => ",self.k,end="\n\n")
+        # print("v => ",self.v,end="\n\n")
+        # print("wo => ",self.wo,end="\n\n")
