@@ -7,11 +7,11 @@ from Utils.display_weights import show
 # input_seq = [[1, 1], [1, 1]]
 # input_seq = [[1.11, 1.45, 0.99], [0.99, 1.32, 1.44], [0.88, 0.94, 1.22]]
 
-# input_seq = [[1.11, 1.45, 0.99,1.00], [0.99, 1.32, 1.44,1.1], [0.88, 0.94, 1.22,.77]]
-# output_seq=[[1,2],[2,3],[3,4]]
+input_seq = [[1.11, 1.45, 0.99,1.00], [0.99, 1.32, 1.44,1.1], [0.88, 0.94, 1.22,.77]]
+output_seq=[[1,2],[2,3],[3,4]]
 
-input_seq = [[0,0], [1,1], [1,0],[0,1]]
-output_seq=[[1],[1],[0],[0]]
+# input_seq = [[0,0], [1,1], [1,0],[0,1]]
+# output_seq=[[1],[1],[0],[0]]
 
 class TransformerBlock:
     def __init__(self, input_seq, output_seq,num_transformer_layers, num_attention_heads,fnn_hidden_size,fnn_hidden_layers):
@@ -117,13 +117,13 @@ class TransformerBlock:
 
             gradient=ln_1.gradient_to_next_layer
 
-t = TransformerBlock(input_seq=input_seq,output_seq=output_seq,num_attention_heads=4,num_transformer_layers=2,fnn_hidden_size=6,fnn_hidden_layers=1)
+# t = TransformerBlock(input_seq=input_seq,output_seq=output_seq,num_attention_heads=4,num_transformer_layers=2,fnn_hidden_size=6,fnn_hidden_layers=1)
 
-EPOCHS=100
-for _ in range(EPOCHS):
-    t.forward_pass()
-    print(f"PREDICTION -> {np.array(t.t_output).T} LOSS -> {np.array(t.loss).T} ERROR -> {t.error}")
-    t.backpropagation(lr=0.01)
+# EPOCHS=100
+# for _ in range(EPOCHS):
+#     t.forward_pass()
+#     print(f"PREDICTION -> {np.array(t.t_output).T} LOSS -> {np.array(t.loss).T} ERROR -> {t.error}")
+#     t.backpropagation(lr=0.01)
 
 # for i in t.forward_pass_values:
 
@@ -160,8 +160,8 @@ for _ in range(EPOCHS):
 
 # ==========================================================================================
 
-# a=AttentionBlock(num_heads=2,input_seq=np.array(input_seq),verbose=True)
-# a.weight_init()
-# a.forward_pass(input_from_last_layer=np.array(input_seq))
-# a.backpropagation(gradient_from_last_layer=np.eye(3,4)) 
-# a.update_weights(lr=0.1)
+a=AttentionBlock(num_heads=2,input_seq=np.array(input_seq),verbose=True)
+a.weight_init()
+a.forward_pass(input_from_last_layer=np.array(input_seq))
+a.backpropagation(gradient_from_last_layer=np.eye(3,4)) 
+a.update_weights(lr=0.1)

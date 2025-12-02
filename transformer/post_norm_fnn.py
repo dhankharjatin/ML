@@ -30,7 +30,7 @@ class TransformerBlock:
             fnn=FNN(self.input_seq,hidden_size=fnn_hidden_size,hidden_layers=fnn_hidden_layers)
             fnn.weight_init()
 
-            self.layers.append([ln_1,fnn])
+            self.layers.append([fnn,ln_1])
 
         # show(self.layers)
 
@@ -41,19 +41,19 @@ class TransformerBlock:
 
 
         for layer in self.layers:
-            ln_1 : Norm=layer[0]
-            fnn : FNN=layer[1]
+            fnn : FNN=layer[0]
+            ln_1 : Norm=layer[1]
 
 
-            ln_1.forward(self.output_from_last_layer)
+            fnn.forward(input_from_last_layer=self.output_from_last_layer)
+            
+            residual_connection_1=self.output_from_last_layer+fnn.f_pass_values[-1][0]
+            
+            ln_1.forward(residual_connection_1)
+            # ln_1.forward(fnn.f_pass_values[-1][0])
             ln_1.scale()
 
-            fnn.forward(input_from_last_layer=ln_1.scaled_matrix)
-
-            residual_connection_2=self.output_from_last_layer+fnn.f_pass_values[-1][0]
-
-            # self.output_from_last_layer=residual_connection_2
-            self.output_from_last_layer=fnn.f_pass_values[-1][0]
+            self.output_from_last_layer=ln_1.scaled_matrix
 
             self.forward_pass_values.append(
                 [
@@ -74,23 +74,27 @@ class TransformerBlock:
         gradient=self.loss @ self.t_output_weight.T
 
         for layer in self.layers[::-1]:
-            fnn:FNN = layer[-1]
-            ln_1:Norm = layer[-2]
-
-            # res_gradient=gradient
-            fnn.backpropagation(gradient_from_last_layer=gradient)
-            fnn.update_weights(lr=lr)
+            ln_1:Norm = layer[-1]
+            fnn:FNN = layer[-2]
 
             ln_1.create_jacobian()
-            ln_1.backpropagation(gradient_from_last_layer=fnn.gradient_to_next_layer,jacobian_matrix=ln_1.jacobian_matrix)
+            ln_1.backpropagation(gradient_from_last_layer=gradient,jacobian_matrix=ln_1.jacobian_matrix)
             ln_1.update_weights(lr=lr)
 
-            # gradient=ln_1.gradient_to_next_layer+res_gradient
-            gradient=ln_1.gradient_to_next_layer
+            res_gradient=ln_1.gradient_to_next_layer.copy()
+
+            fnn.backpropagation(gradient_from_last_layer=ln_1.gradient_to_next_layer)
+            fnn.update_weights(lr=lr)
+
+
+            gradient=fnn.gradient_to_next_layer+res_gradient
+            # gradient=fnn.gradient_to_next_layer
+
+    
 
 t = TransformerBlock(input_seq=input_seq,output_seq=output_seq,num_transformer_layers=2,fnn_hidden_size=6,fnn_hidden_layers=1)
 
-EPOCHS=500
+EPOCHS=100
 for _ in range(EPOCHS):
     t.forward_pass()
     print(f"PREDICTION -> {np.array(t.t_output).T} LOSS -> {np.array(t.loss).T} ERROR -> {t.error}")

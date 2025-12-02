@@ -143,10 +143,12 @@ class AttentionBlock:
 
     def backpropagation(self,gradient_from_last_layer):
 
-        # print("\n\n============= bakpropagation ======================= \n\n")
+        print("\n\n============= bakpropagation ======================= \n\n")
 
         self.delta=gradient_from_last_layer.T @ self.combined_matrix
-        # print(self.delta,end="\n\n")
+        print("gradient for wo -> ",self.delta,end="\n\n")
+        self.delta=self.combined_matrix.T @ gradient_from_last_layer 
+        print("gradient for wo -> ",self.delta,end="\n\n")
 
         gradient=gradient_from_last_layer @ self.wo
         
@@ -164,7 +166,6 @@ class AttentionBlock:
             g_v=(i.T @ np.array(self.all_softmax_masked_score[idx])).T
 
             gradient =i @ self.Vs[idx].T
-            # print(gradient)
 
             
             # backdroping though softmax =====================================================
@@ -198,9 +199,9 @@ class AttentionBlock:
         self.total_gradient_v=np.concat(self.gradient_v,axis=1)
         self.total_gradient_k=np.concat(self.gradient_k,axis=1)
 
-        # print(self.total_gradient_q,end="\n\n")
-        # print(self.total_gradient_k,end="\n\n")
-        # print(self.total_gradient_v,end="\n\n")
+        print("gradient for q",self.total_gradient_q,end="\n\n")
+        print("gradient for k ",self.total_gradient_k,end="\n\n")
+        print("gradient for v",self.total_gradient_v,end="\n\n")
 
         self.gqs=np.concat(self.gqs,axis=1)
         self.gks=np.concat(self.gks,axis=1)
@@ -208,7 +209,7 @@ class AttentionBlock:
 
         self.gradient_to_next_layer = (self.gqs @ self.q ) + (self.gks @ self.q ) + (self.gvs @ self.q ) 
 
-        # print(self.gradient_to_next_layer)
+        print("gradient for next layer -> ",self.gradient_to_next_layer)
 
 
     def update_weights(self,lr):
