@@ -64,6 +64,25 @@ class AttentionBlock:
         #         [0, 0, 0, 1],
         #     ],dtype=np.float64
         # )
+        # self.q = np.array([[0.54996149, 0.39209668, 0.02231746, 0.48168687],
+        #       [0.17846079, 0.59506052, 0.27767094, 0.99438220],
+        #       [0.78372351, 0.93071373, 0.60868734, 0.25713706],
+        #       [0.86374547, 0.20451310, 0.52022287, 0.73113249]])
+
+        # self.k = np.array([[0.13179803, 0.86064070, 0.64492262, 0.47987069],
+        #             [0.16408382, 0.83949395, 0.37309877, 0.95698553],
+        #             [0.22570978, 0.58066413, 0.69773053, 0.58552252],
+        #             [0.48725987, 0.32354720, 0.01374808, 0.40714439]])
+
+        # self.v = np.array([[0.09519453, 0.29168806, 0.47696261, 0.27997762],
+        #             [0.69538272, 0.22538543, 0.30028171, 0.37976110],
+        #             [0.04170441, 0.17910670, 0.22816673, 0.01213948],
+        #             [0.70658640, 0.27623120, 0.85991468, 0.13645307]])
+
+        # self.wo = np.array([[0.48194419, 0.75491935, 0.32472981, 0.17631607],
+        #             [0.64027037, 0.78707261, 0.55516965, 0.01710959],
+        #             [0.26693266, 0.88208908, 0.16231246, 0.99274457],
+        #             [0.48128538, 0.19762023, 0.36148378, 0.64238365]])
 
         if self.verbose:
             print(f"============ initial weights ============\n\n q => {self.q}\n\nk => {self.k}\n\nv => {self.v}\n\nwo => {self.wo}")
@@ -143,14 +162,14 @@ class AttentionBlock:
 
     def backpropagation(self,gradient_from_last_layer):
 
-        print("\n\n============= bakpropagation ======================= \n\n")
+        # print("\n\n============= bakpropagation ======================= \n\n")
 
-        self.delta=gradient_from_last_layer.T @ self.combined_matrix
-        print("gradient for wo -> ",self.delta,end="\n\n")
+        # self.delta=gradient_from_last_layer.T @ self.combined_matrix
+        # print("gradient for wo -> ",self.delta,end="\n\n")
         self.delta=self.combined_matrix.T @ gradient_from_last_layer 
-        print("gradient for wo -> ",self.delta,end="\n\n")
+        # print("gradient for wo -> ",self.delta,end="\n\n")
 
-        gradient=gradient_from_last_layer @ self.wo
+        gradient=gradient_from_last_layer @ self.wo.T
         
         self.gradient_v=[]
         self.gradient_k=[]
@@ -166,7 +185,6 @@ class AttentionBlock:
             g_v=(i.T @ np.array(self.all_softmax_masked_score[idx])).T
 
             gradient =i @ self.Vs[idx].T
-
             
             # backdroping though softmax =====================================================
 
@@ -179,13 +197,12 @@ class AttentionBlock:
 
             # ===================================================================================
 
-            gradient @= softmax_delta 
-            gradient /=self.D_k 
+            softmax_delta /=self.D_k ** (1/2) 
 
-            g_q= gradient @ self.Ks[idx]
+            g_q= softmax_delta @ self.Ks[idx]
             self.gradient_q.append(self.input_from_last_layer.T @ g_q)
 
-            g_k = gradient @ self.Qs[idx]
+            g_k = softmax_delta.T @ self.Qs[idx]
             self.gradient_k.append(self.input_from_last_layer.T @ g_k)
 
             self.gradient_v.append(self.input_from_last_layer.T @ g_v)
@@ -199,17 +216,17 @@ class AttentionBlock:
         self.total_gradient_v=np.concat(self.gradient_v,axis=1)
         self.total_gradient_k=np.concat(self.gradient_k,axis=1)
 
-        print("gradient for q",self.total_gradient_q,end="\n\n")
-        print("gradient for k ",self.total_gradient_k,end="\n\n")
-        print("gradient for v",self.total_gradient_v,end="\n\n")
+        # print("gradient for q",self.total_gradient_q,end="\n\n")
+        # print("gradient for k ",self.total_gradient_k,end="\n\n")
+        # print("gradient for v",self.total_gradient_v,end="\n\n")
 
         self.gqs=np.concat(self.gqs,axis=1)
         self.gks=np.concat(self.gks,axis=1)
         self.gvs=np.concat(self.gvs,axis=1)
 
-        self.gradient_to_next_layer = (self.gqs @ self.q ) + (self.gks @ self.q ) + (self.gvs @ self.q ) 
+        self.gradient_to_next_layer = (self.gqs @ self.q.T ) + (self.gks @ self.k.T ) + (self.gvs @ self.v.T ) 
 
-        print("gradient for next layer -> ",self.gradient_to_next_layer)
+        # print("gradient for next layer -> ",self.gradient_to_next_layer)
 
 
     def update_weights(self,lr):
