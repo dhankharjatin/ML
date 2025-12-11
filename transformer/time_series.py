@@ -5,19 +5,69 @@ import numpy as np
 from Utils.display_weights import show
 from pooling.attention_pooling import AttentionPooling
 import matplotlib.pyplot as plt
-# input_seq = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
-# input_seq = [[1, 1], [1, 1]]
-# input_seq = [[1.11, 1.45, 0.99], [0.99, 1.32, 1.44], [0.88, 0.94, 1.22]]
 
-# input_seq = [[1.11, 1.45, 0.99,1.00], [0.99, 1.32, 1.44,1.1], [0.88, 0.94, 1.22,.77]]
-# output_seq=[[1,2],[2,3],[3,4]]
+# input_seq=[
+#     [
+#         [1,0],[1,1]
+#     ],
+#     [
+#         [0,0],[0,1]
+#     ],    
+#     [
+#         [1,1],[0,0]
+#     ],
+#     [
+#         [1,0],[0,1]
+#     ],    
+#     [
+#         [1,1],[1,0]
+#     ],
+#     [
+#         [0,1],[0,0]
+#     ],    
+#     [
+#         [0,0],[1,1]
+#     ],
+#     [
+#         [0,1],[1,0]
+#     ],    
 
-# input_seq = [[0,0], [1,1], [1,0],[0,1]]
-# output_seq=[[1],[1],[0],[0]]
+# ]
+# output_seq=[
+#     [
+#         [0],[1]
+#     ],
+#     [
+#         [1],[0]
+#     ],
+#     [
+#         [1],[1]
+#     ],
+#     [
+#         [0],[0]
+#     ],
+#     [
+#         [0],[1]
+#     ],
+#     [
+#         [1],[0]
+#     ],
+#     [
+#         [1],[1]
+#     ],
+#     [
+#         [0],[0]
+#     ],
+# ]
 
-input_seq = [[1,2,3], [5,9,8], [10,10,10], [11,1,12],[5,4,3],[9,8,9],[9,1,1],[1,3,3],[2,0,4],[5,1,9],[0,5,10],[3,13,12],[4,5,7],[1,1,1]]
-output_seq = [[3,2,1], [8,9,5], [10,10,10], [12,1,11],[3,4,5],[9,8,8],[1,1,9],[3,3,1],[4,0,2],[9,1,5],[10,5,0],[12,13,3],[7,5,4],[1,1,1]]
+from data import l
 
+amount=20
+input_seq=[]
+output_seq=[]
+for i in range(len(l)-amount):
+    input_seq.append(l[i:i+amount])
+    output_seq.append([l[i+amount]])
 
 class TransformerBlock:
     def __init__(self, input_seq, output_seq,num_transformer_layers, num_attention_heads,fnn_hidden_size):
@@ -56,12 +106,15 @@ class TransformerBlock:
         self.pooling=AttentionPooling(self.input_seq,final_output_dim=self.output_seq.shape)
 
 
-    # def forward_pass(self,timestep_input,timestep_output):
-    def forward_pass(self):
+    def forward_pass(self,timestep_input,timestep_output):
+    # def forward_pass(self):
 
+        # print("input taken -> ",timestep_input)
+        # print("output used -> ",timestep_output)
+
+        self.output_from_last_layer=timestep_input
         
-        self.output_from_last_layer=self.input_seq
-        # self.output_from_last_layer=timestep_input
+        # self.output_from_last_layer=self.input_seq
         self.forward_pass_values=[]
 
 
@@ -92,38 +145,15 @@ class TransformerBlock:
 
             self.output_from_last_layer=ln_2.scaled_matrix
 
-            self.forward_pass_values.append(
-                [
-                    attention.output_MHA,
-                    residual_connection_1,
-                    ln_1.normalized_matrix,
-                    ln_1.scaled_matrix,
-                    fnn.f_pass_values[-1],
-                    residual_connection_2,
-                    ln_2.normalized_matrix,
-                    ln_2.scaled_matrix,
-                ]
-            )
-        # self.t_output = self.output_from_last_layer @ self.t_output_weight
-        # self.loss = self.t_output - self.output_seq
-        # self.loss = self.t_output - timestep_output
-
-        # self.pooling.forward(output_from_last_layer=self.output_from_last_layer)
-        # self.transformer_output = self.pooling.output  
-
         self.transformation1 = self.output_from_last_layer @ self.final_output_matrix1
         self.transformation2 = self.final_output_matrix2 @ self.transformation1
 
-        self.loss = self.transformation2 - self.output_seq
+        # self.loss = self.transformation2 - self.output_seq
+        self.loss = self.transformation2 - timestep_output
         self.error = 0.5 * np.sum(self.loss ** 2)
 
     def backpropagation(self,lr):
-        # delta_t_out_weight= self.output_from_last_layer.T @ self.loss
-        # self.t_output_weight -= delta_t_out_weight * lr
-        # gradient=self.loss @ self.t_output_weight.T
 
-        # self.pooling.backpropagation(self.loss)
-        # self.pooling.update_weights(lr=lr)
 
         delta_f2 = self.loss @ self.transformation1.T
         gradient = self.loss.T @ self.final_output_matrix2
@@ -168,26 +198,41 @@ class TransformerBlock:
             gradient=attention_block.gradient_to_next_layer + res_gradient_2
 
 
-nn=TransformerBlock(input_seq=input_seq,output_seq=output_seq,num_attention_heads=3,num_transformer_layers=4,fnn_hidden_size=4)
+nn=TransformerBlock(
+    input_seq=input_seq[0],
+    output_seq=output_seq[0],
+    num_attention_heads=1,
+    num_transformer_layers=4,
+    fnn_hidden_size=4
+)
 
 EPOCHS=500
 errors=[]
 for _ in range(EPOCHS):
-    nn.forward_pass()
-    # print(f"prediction -> {np.array(nn.transformation2).T} error -> {nn.error}")
-    print("prediction -> ",nn.transformation2,end="\n\n")
-    print("error -> ",nn.error,end="\n\n")
-    nn.backpropagation(lr=0.001)
-    errors.append(nn.error)
 
-    # print("\n\n==================================\n\n")
-    # for idx in range(len(input_seq)):
-    #     nn.forward_pass(input_seq[idx],output_seq[idx])
-    #     print(f"prediction -> {np.array(nn.t_output).T} error -> {nn.error}")
-    #     # print("prediction -> ",nn.t_output,end="\n\n")
-    #     # print("error -> ",nn.error,end="\n\n")
-    #     nn.backpropagation(lr=0.01)
+    # nn.forward_pass()
+    # # print(f"prediction -> {np.array(nn.transformation2).T} error -> {nn.error}")
+    # print("prediction -> ",nn.transformation2,end="\n\n")
+    # print("error -> ",nn.error,end="\n\n")
+    # nn.backpropagation(lr=0.001)
+    # errors.append(nn.error)
+
+    es=0
+    print("\n\n==================================\n\n")
+    for idx in range(len(input_seq)):
+    
+        nn.forward_pass(input_seq[idx],output_seq[idx])
+        print(f"prediction -> {np.array(nn.transformation2).T} error -> {nn.error}")
+        # print("prediction -> ",nn.transformation2,end="\n\n")
+        # print("error -> ",nn.error,end="\n\n")
+        nn.backpropagation(lr=0.01)
+        es+=nn.error
+
+    es /= len(input_seq)
+    errors.append(es)
 
 plt.plot(errors)
 plt.show()
+
+
 
