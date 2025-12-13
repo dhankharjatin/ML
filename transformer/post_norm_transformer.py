@@ -190,4 +190,3 @@ for _ in range(EPOCHS):
 
 plt.plot(errors)
 plt.show()
-

@@ -5,6 +5,7 @@ import numpy as np
 from Utils.display_weights import show
 from pooling.attention_pooling import AttentionPooling
 import matplotlib.pyplot as plt
+from weights.save_weights import save 
 
 # input_seq=[
 #     [
@@ -62,7 +63,7 @@ import matplotlib.pyplot as plt
 
 from data import l
 
-amount=20
+amount=30
 input_seq=[]
 output_seq=[]
 for i in range(len(l)-amount):
@@ -106,7 +107,7 @@ class TransformerBlock:
         self.pooling=AttentionPooling(self.input_seq,final_output_dim=self.output_seq.shape)
 
 
-    def forward_pass(self,timestep_input,timestep_output):
+    def forward_pass(self,timestep_input):
     # def forward_pass(self):
 
         # print("input taken -> ",timestep_input)
@@ -149,11 +150,11 @@ class TransformerBlock:
         self.transformation2 = self.final_output_matrix2 @ self.transformation1
 
         # self.loss = self.transformation2 - self.output_seq
+
+    def backpropagation(self,lr,timestep_output):
+
         self.loss = self.transformation2 - timestep_output
         self.error = 0.5 * np.sum(self.loss ** 2)
-
-    def backpropagation(self,lr):
-
 
         delta_f2 = self.loss @ self.transformation1.T
         gradient = self.loss.T @ self.final_output_matrix2
@@ -201,12 +202,12 @@ class TransformerBlock:
 nn=TransformerBlock(
     input_seq=input_seq[0],
     output_seq=output_seq[0],
-    num_attention_heads=1,
-    num_transformer_layers=4,
+    num_attention_heads=3,
+    num_transformer_layers=2,   
     fnn_hidden_size=4
 )
 
-EPOCHS=500
+EPOCHS=1
 errors=[]
 for _ in range(EPOCHS):
 
@@ -221,11 +222,12 @@ for _ in range(EPOCHS):
     print("\n\n==================================\n\n")
     for idx in range(len(input_seq)):
     
-        nn.forward_pass(input_seq[idx],output_seq[idx])
-        print(f"prediction -> {np.array(nn.transformation2).T} error -> {nn.error}")
+        nn.forward_pass(input_seq[idx])
+        nn.backpropagation(lr=0.001,timestep_output=output_seq[idx])
+        
+        print(f"prediction -> {np.array(nn.transformation2)} error -> {nn.error}")
         # print("prediction -> ",nn.transformation2,end="\n\n")
         # print("error -> ",nn.error,end="\n\n")
-        nn.backpropagation(lr=0.01)
         es+=nn.error
 
     es /= len(input_seq)
@@ -234,5 +236,28 @@ for _ in range(EPOCHS):
 plt.plot(errors)
 plt.show()
 
+save(nn)
 
+# og=l[0:30]
+# test=l[0:30]
 
+# for i in range(30):
+#     nn.forward_pass(timestep_input=np.array(test))
+#     test=test[1:]
+#     test.append(tuple(nn.transformation2[0]))
+
+# plt.plot(og)
+# plt.plot(range(len(og),len(og)+len(test)),test)
+# plt.show()
+
+# og=l[20:50]
+# test=l[20:50]
+
+# for i in range(30):
+#     nn.forward_pass(timestep_input=np.array(test))
+#     test=test[1:]
+#     test.append(tuple(nn.transformation2[0]))
+
+# plt.plot(og)
+# plt.plot(range(len(og),len(og)+len(test)),test)
+# plt.show()
