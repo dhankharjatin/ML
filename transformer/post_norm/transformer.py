@@ -1,74 +1,9 @@
+import numpy as np
+
 from attention.attention_block import AttentionBlock
 from LayerNorm.ln import Norm
 from fnn.fnn_block import FNN
-import numpy as np
-from Utils.display_weights import show
-from pooling.attention_pooling import AttentionPooling
-import matplotlib.pyplot as plt
-from weights.save_weights import save 
 
-# input_seq=[
-#     [
-#         [1,0],[1,1]
-#     ],
-#     [
-#         [0,0],[0,1]
-#     ],    
-#     [
-#         [1,1],[0,0]
-#     ],
-#     [
-#         [1,0],[0,1]
-#     ],    
-#     [
-#         [1,1],[1,0]
-#     ],
-#     [
-#         [0,1],[0,0]
-#     ],    
-#     [
-#         [0,0],[1,1]
-#     ],
-#     [
-#         [0,1],[1,0]
-#     ],    
-
-# ]
-# output_seq=[
-#     [
-#         [0],[1]
-#     ],
-#     [
-#         [1],[0]
-#     ],
-#     [
-#         [1],[1]
-#     ],
-#     [
-#         [0],[0]
-#     ],
-#     [
-#         [0],[1]
-#     ],
-#     [
-#         [1],[0]
-#     ],
-#     [
-#         [1],[1]
-#     ],
-#     [
-#         [0],[0]
-#     ],
-# ]
-
-from data import l
-
-amount=30
-input_seq=[]
-output_seq=[]
-for i in range(len(l)-amount):
-    input_seq.append(l[i:i+amount])
-    output_seq.append([l[i+amount]])
 
 class TransformerBlock:
     def __init__(self, input_seq, output_seq,num_transformer_layers, num_attention_heads,fnn_hidden_size):
@@ -79,7 +14,7 @@ class TransformerBlock:
 
         self.num_transformer_layers=num_transformer_layers
         self.num_attention_heads=num_attention_heads
-        
+
         # print(self.input_seq,self.input_seq.shape)
         # print(self.output_seq,self.output_seq.shape)
 
@@ -87,7 +22,7 @@ class TransformerBlock:
         self.final_output_matrix1= np.random.rand(self.input_seq.shape[1],self.output_seq.shape[1])
         self.final_output_matrix2= np.random.rand(self.output_seq.shape[0], self.input_seq.shape[0])
 
-        for _ in range(num_transformer_layers):
+        for _ in range(self.num_transformer_layers):
 
 
             attention_block = AttentionBlock(
@@ -106,7 +41,6 @@ class TransformerBlock:
             ln_2.weight_init()
             
             self.layers.append([attention_block,ln_1,fnn,ln_2])
-
 
     def forward_pass(self,timestep_input):
     # def forward_pass(self):
@@ -198,67 +132,3 @@ class TransformerBlock:
 
 
             gradient=attention_block.gradient_to_next_layer + res_gradient_2
-
-
-nn=TransformerBlock(
-    input_seq=input_seq[0],
-    output_seq=output_seq[0],
-    num_attention_heads=2,
-    num_transformer_layers=10,   
-    fnn_hidden_size=4
-)
-
-EPOCHS=150
-errors=[]
-for _ in range(EPOCHS):
-
-    # nn.forward_pass()
-    # # print(f"prediction -> {np.array(nn.transformation2).T} error -> {nn.error}")
-    # print("prediction -> ",nn.transformation2,end="\n\n")
-    # print("error -> ",nn.error,end="\n\n")
-    # nn.backpropagation(lr=0.001)
-    # errors.append(nn.error)
-
-    es=0
-    print("\n\n==================================\n\n")
-    for idx in range(len(input_seq)):
-    
-        nn.forward_pass(input_seq[idx])
-        nn.backpropagation(lr=0.001,timestep_output=output_seq[idx])
-        
-        print(f"prediction -> {np.array(nn.transformation2)} error -> {nn.error}")
-        # print("prediction -> ",nn.transformation2,end="\n\n")
-        # print("error -> ",nn.error,end="\n\n")
-        es+=nn.error
-
-    es /= len(input_seq)
-    errors.append(es)
-
-plt.plot(errors)
-plt.show()
-
-save(nn)
-
-og=l[0:30]
-test=l[0:30]
-
-for i in range(30):
-    nn.forward_pass(timestep_input=np.array(test))
-    test=test[1:]
-    test.append(tuple(nn.transformation2[0]))
-
-plt.plot(og)
-plt.plot(range(len(og),len(og)+len(test)),test)
-plt.show()
-
-og=l[20:50]
-test=l[20:50]
-
-for i in range(30):
-    nn.forward_pass(timestep_input=np.array(test))
-    test=test[1:]
-    test.append(tuple(nn.transformation2[0]))
-
-plt.plot(og)
-plt.plot(range(len(og),len(og)+len(test)),test)
-plt.show()

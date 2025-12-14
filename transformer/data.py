@@ -1,16 +1,34 @@
 import math
 import matplotlib.pyplot as plt
+import random
+
+limit=121
 
 l=[]
-v=20
-for i in range(61):
+
+up=True
+tri=0
+for i in range(limit):
     s=math.sin(i) *2
     c=math.cos(i) *2
-    # v/=1.01
 
-    mul=(s*v) /4
+    r=5
+    if i%5==0:
+        r=10
+        if i %10 ==0:
+            r=0
 
-    l.append((s,c,mul))
+    if i% 30 ==0:
+        up = not up
+
+    if up:
+        tri-=0.5
+
+    else:
+        tri+=0.5
+
+
+    l.append((s,c,r,tri))
 
 
 if __name__ == "__main__":

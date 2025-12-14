@@ -1,33 +1,38 @@
+import cupy as c
 import numpy as np
+import time
 
-def softmax(matrix):
-    softmax_matrix=[]
-    for row in matrix:
-        row=row-np.max(row)
-        row=np.exp(row)
-        row=row/np.sum(row)
+limit=200
 
-        softmax_matrix.append(row)
+# numpy ==============================
 
-    return softmax_matrix
+def numpy_test(shape,limit):
+    start=time.time()
+    gradient=np.random.rand(shape[0],shape[1])
+    for i in range(limit):
+        random_mat=np.random.rand(shape[0],shape[1])
+        gradient @= random_mat
+    
+    print(f"\n\nnumpy done in {time.time()-start} \n\n")
 
+# cupy ==============================
 
-a=np.array([[1,1.1,1.2],[1.5,1.6,1.7]])
+def cupy_test(shape,limit):
+    start=time.time()
+    gradient=c.random.rand(shape[0],shape[1])
+    for i in range(limit):
+        random_mat=c.random.rand(shape[0],shape[1])
+        gradient @= random_mat
+    
+    print(f"\n\ncupy done in {time.time()-start} \n\n")
+    input("adfasdf")
 
-b= softmax(a)
+shapes=[(5,5),(100,100),(264,264),(512,512),(1024,1024),(4096,4096)]
+# limit=[]
 
-print(a,b)
+# for i in shapes:
+#     print("for ",i)
+#     numpy_test(i,200)
+#     cupy_test(i,200)
 
-# b=np.array([([1.44328570e-66, 1.20136826e-33, 1.00000000e+00]), ([6.52102707e-172, 2.55363018e-086, 1.00000000e+000]), ([2.94631853e-277, 5.42800012e-139, 1.00000000e+000])])
-
-# def softmax_jacobian(b_row):
-#     b = b_row.reshape(-1, 1)  # column vector
-#     J = np.diagflat(b) - np.dot(b, b.T)
-#     return J
-
-# jacobians = np.array([softmax_jacobian(row) for row in b])
-# print(jacobians)
-
-
-
-
+cupy_test((4096*4,4096*4),200)
