@@ -1,4 +1,5 @@
 import numpy as np
+from accelerator import xp
 
 
 class Norm:
@@ -9,8 +10,8 @@ class Norm:
     def weight_init(self):
         rows, columns = self.input_seq.shape
 
-        self.alpha = np.ones((rows, columns))
-        self.beta = np.zeros((rows, columns))
+        self.alpha = xp.ones((rows, columns))
+        self.beta = xp.zeros((rows, columns))
 
     def forward(self,input_from_last_layer):
 
@@ -19,7 +20,7 @@ class Norm:
         self.d_and_sd = []
 
         for lis in self.input_from_last_layer:
-            mean = np.average(lis)
+            mean = xp.average(lis)
             if self.verbose:
                 print("\nmean ", mean)
 
@@ -51,7 +52,7 @@ class Norm:
             self.d_and_sd.append([deviations, standard_deviation])
 
     def scale(self):
-        self.scaled_matrix = (np.array(self.normalized_matrix) * self.alpha) + self.beta
+        self.scaled_matrix = (xp.array(self.normalized_matrix) * self.alpha) + self.beta
         
         if self.verbose:
             print("---------------- norm ---------------")
@@ -87,13 +88,13 @@ class Norm:
                 jacobian.append(temp)
 
             self.jacobian_matrix.append(jacobian)
-        self.jacobian_matrix=np.array(self.jacobian_matrix)
+        self.jacobian_matrix=xp.array(self.jacobian_matrix)
 
     def backpropagation(self,gradient_from_last_layer,jacobian_matrix):
 
         self.gradient_from_last_layer=gradient_from_last_layer
         
-        self.gradient=self.gradient_from_last_layer * self.normalized_matrix
+        self.gradient=self.gradient_from_last_layer * xp.array(self.normalized_matrix)
 
 
         self.delta=self.gradient_from_last_layer * self.alpha
@@ -101,7 +102,7 @@ class Norm:
         for idx,i in enumerate(jacobian_matrix):
             self.gradient_to_next_layer.append(i @ self.delta[idx].T)
 
-        self.gradient_to_next_layer=np.array(self.gradient_to_next_layer)
+        self.gradient_to_next_layer=xp.array(self.gradient_to_next_layer)
 
         if self.verbose:
             print("---------------- bp ---------------")

@@ -1,4 +1,5 @@
 import numpy as np
+from accelerator import xp
 
 class FNN:
     def __init__(self, input_seq, hidden_size, hidden_layers,verbose=False):
@@ -8,19 +9,20 @@ class FNN:
         self.verbose = verbose
 
     def handel_activation(matrix):
-        new_matrix=[]
-        for row in matrix:
-            new_row=[]
-            for value in row:
-                if value>0:
-                    new_row.append(value)
+        # new_matrix=[]
+        # for row in matrix:
+        #     new_row=[]
+        #     for value in row:
+        #         if value>0:
+        #             new_row.append(value)
 
-                else:
-                    new_row.append(0)
+        #         else:
+        #             new_row.append(0)
 
-            new_matrix.append(new_row)
+        #     new_matrix.append(new_row)
 
-        return np.array(new_matrix)
+        # return xp.array(new_matrix)
+         return xp.maximum(matrix, 0)
     
     def derivative_of_ReLU(matrix):
         new_matrix=[]
@@ -33,7 +35,7 @@ class FNN:
                 else:
                     new_row.append(0)
             new_matrix.append(new_row)
-        return np.array(new_matrix)
+        return xp.array(new_matrix)
 
     def weight_init(self):
         rows, columns = self.input_seq.shape
@@ -43,16 +45,16 @@ class FNN:
 
         for i in range(self.hidden_layers + 1):
             if i == 0:
-                w = np.random.rand(columns, self.hidden_size)
-                b = np.random.rand(rows, self.hidden_size)
+                w = xp.random.rand(columns, self.hidden_size)
+                b = xp.random.rand(rows, self.hidden_size)
 
             elif i == self.hidden_layers:
-                w = np.random.rand(self.hidden_size, columns)
-                b = np.random.rand(rows, columns)
+                w = xp.random.rand(self.hidden_size, columns)
+                b = xp.random.rand(rows, columns)
 
             else:
-                w = np.random.rand(self.hidden_size, self.hidden_size)
-                b = np.random.rand(rows, self.hidden_size)
+                w = xp.random.rand(self.hidden_size, self.hidden_size)
+                b = xp.random.rand(rows, self.hidden_size)
 
             self.weights.append(w)
             self.bias.append(b)

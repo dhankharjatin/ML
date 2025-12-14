@@ -4,13 +4,15 @@ from attention.attention_block import AttentionBlock
 from LayerNorm.ln import Norm
 from fnn.fnn_block import FNN
 
+from accelerator import xp
+
 
 class TransformerBlock:
     def __init__(self, input_seq, output_seq,num_transformer_layers, num_attention_heads,fnn_hidden_size):
 
         self.layers = []
-        self.input_seq=np.array(input_seq)
-        self.output_seq=np.array(output_seq)
+        self.input_seq=xp.array(input_seq)
+        self.output_seq=xp.array(output_seq)
 
         self.num_transformer_layers=num_transformer_layers
         self.num_attention_heads=num_attention_heads
@@ -18,9 +20,9 @@ class TransformerBlock:
         # print(self.input_seq,self.input_seq.shape)
         # print(self.output_seq,self.output_seq.shape)
 
-        # self.t_output_weight=np.random.rand(self.input_seq.shape[1],self.output_seq.shape[1])
-        self.final_output_matrix1= np.random.rand(self.input_seq.shape[1],self.output_seq.shape[1])
-        self.final_output_matrix2= np.random.rand(self.output_seq.shape[0], self.input_seq.shape[0])
+        # self.t_output_weight=xp.random.rand(self.input_seq.shape[1],self.output_seq.shape[1])
+        self.final_output_matrix1= xp.random.rand(self.input_seq.shape[1],self.output_seq.shape[1])
+        self.final_output_matrix2= xp.random.rand(self.output_seq.shape[0], self.input_seq.shape[0])
 
         for _ in range(self.num_transformer_layers):
 
@@ -48,7 +50,7 @@ class TransformerBlock:
         # print("input taken -> ",timestep_input)
         # print("output used -> ",timestep_output)
 
-        self.output_from_last_layer=timestep_input
+        self.output_from_last_layer=xp.array(timestep_input)
         
         # self.output_from_last_layer=self.input_seq
         self.forward_pass_values=[]
@@ -88,8 +90,8 @@ class TransformerBlock:
 
     def backpropagation(self,lr,timestep_output):
 
-        self.loss = self.transformation2 - timestep_output
-        self.error = 0.5 * np.sum(self.loss ** 2)
+        self.loss = self.transformation2 - xp.array(timestep_output)
+        self.error = 0.5 * xp.sum(self.loss ** 2)
 
         delta_f2 = self.loss @ self.transformation1.T
         gradient = self.loss.T @ self.final_output_matrix2

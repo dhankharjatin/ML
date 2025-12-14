@@ -1,5 +1,5 @@
 try : 
-    import cupy as xp
+    # import cupy as xp
     # xp.zeros(1)
     xp.cuda.runtime.getDeviceCount()  # fails if no GPU
     print("-----using cupy")

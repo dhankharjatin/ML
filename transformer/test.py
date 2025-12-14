@@ -6,6 +6,7 @@ from post_norm.transformer import TransformerBlock
 from weights.assing_weights import assign
 from data import l
 import pandas as pd
+from accelerator import xp
 
 with open("weights.pkl","rb") as file:
     weights=pickle.load(file)
@@ -16,16 +17,11 @@ with open("weights.pkl","rb") as file:
 data=pd.read_csv("transformer/dataset/SOL_LARGE.csv")
 data=data.loc[:,["open","high","low","close"]]
 
-first=830
-last=first+100
 
-input_seq=data[first:last].values.tolist()
-
-# input_seq=l[0:30]
 
 nn = TransformerBlock(
-    input_seq=input_seq,
-    output_seq=input_seq,
+    input_seq=xp.random.rand(2,2),
+    output_seq=xp.random.rand(2,2),
     num_attention_heads=weights["num_heads"],
     num_transformer_layers=weights["num_layers"],
     fnn_hidden_size=10
@@ -34,24 +30,30 @@ nn = TransformerBlock(
 assign(nn,weights)
 
 
-# # test=l[0:30]
-test=data[first:last].values.tolist()
+first=830
+last=first+100
+output_seq_len=1
+num_predicitons=1
+
+test_seq=data[first:last].values.tolist()
 predictions=[]
 
-for i in range(1):
-    nn.forward_pass(timestep_input=np.array(test))
-    # test=test[1:]
-    # test.append(nn.transformation2[0])
+for i in range(num_predicitons):
+    nn.forward_pass(timestep_input=xp.array(test_seq))
+    test_seq=test_seq[1:]
+    if output_seq_len == 1:
+        test_seq.append(nn.transformation2[0])
+        predictions.append(nn.transformation2[0])
 
-    # predictions.append(nn.transformation2[0])
+    else:
+        test_seq.append(nn.transformation2)
+        predictions.append(nn.transformation2)
 
-
-
-actual=data[first:last+30].values.tolist()
+actual=data[first:last+output_seq_len].values.tolist()
 plt.plot(actual)
 plt.show()
 
-plt.plot(input_seq)
+plt.plot(test_seq)
 # plt.plot(range(len(test),len(test)+len(predictions)),predictions[0])
-plt.plot(range(len(test),len(test)+len(nn.transformation2.tolist())),nn.transformation2.tolist())
+plt.plot(range(len(test_seq),len(test_seq)+len(predictions)),predictions)
 plt.show()
