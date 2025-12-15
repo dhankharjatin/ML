@@ -19,7 +19,6 @@ class TransformerBlock:
 
         # print(self.input_seq,self.input_seq.shape)
         # print(self.output_seq,self.output_seq.shape)
-
         # self.t_output_weight=xp.random.rand(self.input_seq.shape[1],self.output_seq.shape[1])
         self.final_output_matrix1= xp.random.rand(self.input_seq.shape[1],self.output_seq.shape[1])
         self.final_output_matrix2= xp.random.rand(self.output_seq.shape[0], self.input_seq.shape[0])

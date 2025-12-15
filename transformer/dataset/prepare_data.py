@@ -16,15 +16,15 @@ for i in range(len(data)-1):
     next=data[i+1]
 
     # difference = ((next[3] - current[3]) / current[3]) *100
-
-    log_return = math.log(next[3]) - math.log(current[3])
-
     # per.append(difference)
-    log_returns.append(log_return)
+
+    close_return = math.log(next[3]) - math.log(current[3])
+    open_return = math.log(next[0]) - math.log(current[0])
+    log_returns.append([close_return,open_return])
+
     # print(difference, log_return)
 
-# plt.plot(per)
-# plt.plot(l)
+# plt.plot(log_returns)
 # plt.show()
 
 

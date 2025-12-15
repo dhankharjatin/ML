@@ -1,6 +1,6 @@
 import json
 import pickle
-def save(network):
+def save(network,file_name):
 
     weights={}
 
@@ -55,6 +55,6 @@ def save(network):
 
     weights["layer_weights"] = layer_weights
 
-    with open("weights.pkl","wb") as file:
+    with open(f"{file_name}.pkl","wb") as file:
         # json.dump(weights,file)
         pickle.dump(weights,file)
